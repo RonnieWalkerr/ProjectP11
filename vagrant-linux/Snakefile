@@ -1,0 +1,76 @@
+rule all:
+    input:
+	    "data/report.txt"
+        "data/output_KEGGadded"
+        "data/output_NCBIadded"
+        "data/output_complete_data"
+        "data/output_newIDs"
+        "data/sorted_data"
+        "data/pub_2_gene"
+
+rule ID_transfer:
+    input:
+        "data/RNA-Seq-counts.txt"
+    output:
+        "data/output_newIDs.txt"
+    script:
+        "scripts/change_id.R"
+
+rule Add_pm_func:
+    input:
+        "data/output_newIDs.txt"
+    output:
+        "data/output_NCBIadded.txt"
+    script:
+        "scripts/addNCBI.py"
+
+
+rule Add_KEGG:
+    input:
+        "data/output_NCBIadded.txt"
+    output:
+        "data/output_KEGGadded.txt"
+    script:
+        "scripts/get_KEGG.R"
+
+
+rule Add_seq:
+    input:
+        "data/output_KEGGadded.txt"
+    output:
+        "data/output_complete_data.txt"
+    script:
+        "scripts/getSequence.py"
+
+
+rule sort_data:
+    input:
+        "data/output_complete_data.txt"
+    output:
+        "data/sorted_data.txt"
+    script:
+        "scripts/Pubmed_sorter.py"
+
+rule pub_2_gene:
+    input:
+        "data/output_complete_data.txt"
+    output:
+        "data/pub_2_gene.txt"
+    script:
+        "scripts/Gen_per_pubmed.py"
+
+rule getGC:
+    input:
+        "data/output_complete_data.txt"
+    output:
+        "data/sorted_data.txt"
+    script:
+        "scripts/getPercentage.py"
+
+rule REPORT:
+    input:
+	    "data/sorted_data.txt"
+    output:
+        "data/report.txt"
+    shell:
+        "snakemake --report report.html"
